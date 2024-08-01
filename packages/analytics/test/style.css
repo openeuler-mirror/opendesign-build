@@ -1,0 +1,14 @@
+#app {
+  width: 800px;
+  margin: auto;
+}
+
+.box {
+  width: 300px;
+  height: 200px;
+  background: linear-gradient(0, red, blue 80%, green);
+}
+
+.img {
+  width: 50vw;
+}
