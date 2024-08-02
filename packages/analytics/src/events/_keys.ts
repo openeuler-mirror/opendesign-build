@@ -3,4 +3,5 @@ export const OpenEventKeys = {
   PageBasePerformance: '$PageBasePerformance',
   LCP: '$LCP',
   INP: '$INP',
+  PageClick: '$PageClick',
 };

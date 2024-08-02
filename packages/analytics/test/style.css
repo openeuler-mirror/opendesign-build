@@ -1,6 +1,19 @@
 #app {
-  width: 800px;
+  width: 1200px;
   margin: auto;
+  display: flex;
+  height: 100vh;
+  overflow: auto;
+  margin-top: 50px;
+}
+
+* {
+  margin: 0;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
 }
 
 .box {
@@ -11,4 +24,27 @@
 
 .img {
   width: 50vw;
+}
+
+.screen2 {
+  height: 150vh;
+  padding: 50px;
+  width: 50%;
+  background-color: rgba(1, 125, 1, .3);
+  overflow: auto;
+}
+
+.screen {
+  height: 600px;
+  padding: 50px;
+  overflow: auto;
+}
+
+.inner-screen {
+  background-color: rgba(130, 0, 0, .1);
+  height: 800px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }

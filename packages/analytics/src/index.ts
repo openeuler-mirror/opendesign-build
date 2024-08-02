@@ -1,12 +1,13 @@
 import { Storage } from './storage';
 import { whenDocumentReady, getClientByUA, isFunction, isPromise, uniqueId } from './utils';
 import { Constant } from './constant';
-import { getInnerEventData } from './events';
+import { getInnerEventData, isInnerEvent, CollectorOptions } from './events';
 import packageJson from '../package.json';
+import { EventContent, EventData, EventHeader, OpenAnalyticsParams, ReportRequest } from './types';
 
-export { OpenEventKeys } from './events/keys';
+export { OpenEventKeys } from './events/_keys';
 
-class StoreKey {
+class AnalyticsStoreKey {
   appPrefix: string;
   client: string;
   session: string;
@@ -24,48 +25,7 @@ class StoreKey {
     return `${Constant.OA_PREFIX}-${this.appPrefix}${key}`;
   }
 }
-type StoreKeyIns = InstanceType<typeof StoreKey>;
-
-export interface EventData {
-  event: string; // 事件名
-  time: number; // 事件采集时间
-  data: Record<string, any>; // 上报的事件数据
-  sId: string; // 会话id
-}
-
-interface ReportOptions {
-  immediate: boolean; // 是否立即上报
-}
-interface EventHeader {
-  cId?: string; // 客户端匿名标识，清除浏览器缓存销毁
-  aId?: string; // 应用id
-  oa_version?: string; // OA版本
-  screen_width?: number; // 屏幕宽度
-  screen_height?: number; // 屏幕高度
-  view_width?: number; // 视口宽度
-  view_height?: number; // 视口高度
-  os?: string; // 客户端操作系统
-  os_version?: string; // 客户端操作系统版本
-  browser?: string; // 客户端浏览器
-  browser_version?: string; // 客户端浏览器版本
-  device?: string; // 设备信息
-  device_type?: string; // 设备类型
-  device_vendor?: string; // 设备品牌
-}
-interface ReportData {
-  header: EventHeader;
-  body: EventData[];
-}
-type RequestFn = (data: ReportData) => Promise<boolean> | void;
-
-export interface OpenAnalyticsParams {
-  request: (data: ReportData) => Promise<boolean> | void; // 上报数据的接口
-  appKey?: string; // 采集app的key，用于区分多app上报
-  immediate?: boolean; // 全局设置是否立即上报
-  requestInterval?: number; //上报间隔
-  maxEvents?: number;
-  requestPlan?: (requestFn: () => void) => void;
-}
+type StoreKeyIns = InstanceType<typeof AnalyticsStoreKey>;
 
 const store = new Storage(localStorage);
 
@@ -93,8 +53,8 @@ function initHeader(keys: StoreKeyIns, appId: string): EventHeader {
     cId: client.id,
     aId: appId,
     oa_version: packageJson.version,
-    view_width: window.innerWidth,
-    view_height: window.innerHeight,
+    viewport_width: window.innerWidth,
+    viewport_height: window.innerHeight,
     screen_width: window.screen.width || window.innerWidth,
     screen_height: window.screen.height || window.innerHeight,
     os: os.name ?? '',
@@ -127,7 +87,7 @@ function getSessionId(sKey: string) {
 }
 
 export class OpenAnalytics {
-  request: RequestFn;
+  request: ReportRequest;
   eventData: EventData[];
   immediate: boolean;
   sessionId: string = '';
@@ -151,7 +111,7 @@ export class OpenAnalytics {
     this.request = params.request;
     this.immediate = params.immediate ?? false;
     this.appKey = params.appKey ?? '';
-    this.StoreKey = new StoreKey(params.appKey);
+    this.StoreKey = new AnalyticsStoreKey(params.appKey);
     this.requestInterval = params.requestInterval ?? Constant.DEFAULT_REQUEST_INTERVAL;
     this.#timer = null;
     this.maxEvents = params.maxEvents ?? Constant.MAX_EVENTS;
@@ -175,7 +135,7 @@ export class OpenAnalytics {
   /**
    * 设置header
    */
-  setHeader(header: Record<string, string>) {
+  setHeader(header: Record<string, string | number>) {
     Object.assign(this.header, header);
   }
   /**
@@ -281,21 +241,25 @@ export class OpenAnalytics {
   /**
    * 采集数据
    * @param event 事件名
-   * @param data 事件数据
+   * @param data 事件数据，如果是内部事件，则会在内部事件触发时执行
    * @param options 配置
    */
-  async report(event: string, data?: Record<string, any> | (() => Record<string, any>), options?: ReportOptions) {
-    const innerData: Record<string, any> = (await getInnerEventData(event)) || {};
+  async report(event: string, content?: (...opts: any[]) => Promise<EventContent> | EventContent, collectOptions?: CollectorOptions, immediate?: boolean) {
+    let reportData: EventContent = {};
 
-    const outerData = isFunction(data) ? data() : data;
+    if (isInnerEvent(event)) {
+      reportData = (await getInnerEventData(event, collectOptions)) || {};
+    } else if (content) {
+      reportData = await content();
+    }
 
     const eventData: EventData = {
       event: event,
       time: Date.now(),
-      data: Object.assign(innerData, outerData),
+      data: reportData,
       sId: this.enabled ? getSessionId(this.StoreKey.session) : '',
     };
 
-    this.collect(eventData, options?.immediate);
+    this.collect(eventData, immediate);
   }
 }

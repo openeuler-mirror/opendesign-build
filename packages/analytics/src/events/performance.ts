@@ -1,7 +1,8 @@
-import { OpenEventKeys } from './keys';
+import { OpenEventKeys } from './_keys';
 import { onFCP, onTTFB } from 'web-vitals';
 
 interface PerformanceData {
+  url: string;
   fcp: number;
   ttfb: number;
   load: number;
@@ -28,6 +29,7 @@ export default {
   collector: () => {
     return new Promise((resolve) => {
       const data: PerformanceData = {
+        url: window.location.href,
         fcp: -1,
         ttfb: -1,
         load: -1,
