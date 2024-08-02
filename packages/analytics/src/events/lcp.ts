@@ -1,4 +1,4 @@
-import { OpenEventKeys } from './keys';
+import { OpenEventKeys } from './_keys';
 import { onLCP } from 'web-vitals';
 
 export default {
@@ -7,6 +7,7 @@ export default {
     return new Promise((resolve) => {
       onLCP((m) => {
         resolve({
+          url: window.location.href,
           lcp: m.value,
         });
       });

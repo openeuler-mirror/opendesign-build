@@ -1,4 +1,4 @@
-import { OpenEventKeys } from './keys';
+import { OpenEventKeys } from './_keys';
 
 export default {
   event: OpenEventKeys.PV,

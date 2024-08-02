@@ -1,6 +1,6 @@
 import { EventContent } from '../types';
 import { isFunction } from '../utils';
-import { OpenEventKeys } from './keys';
+import { OpenEventKeys } from './_keys';
 
 async function handleClick(e: MouseEvent, customData?: (event: MouseEvent) => Promise<EventContent> | EventContent) {
   const { pageX, pageY } = e;

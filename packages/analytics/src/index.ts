@@ -5,7 +5,7 @@ import { getInnerEventData, isInnerEvent, CollectorOptions } from './events';
 import packageJson from '../package.json';
 import { EventContent, EventData, EventHeader, OpenAnalyticsParams, ReportRequest } from './types';
 
-export { OpenEventKeys } from './events/keys';
+export { OpenEventKeys } from './events/_keys';
 
 class AnalyticsStoreKey {
   appPrefix: string;
