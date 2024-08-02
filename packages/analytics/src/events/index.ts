@@ -1,12 +1,19 @@
 import { OpenEventKeys } from './keys';
+import { EventContent } from '../types';
 
 import { isFunction } from '../utils';
 
-type EventCollector = (...params: any[]) => Promise<Record<string, any>> | Record<string, any>;
+export interface CollectorOptions {
+  customData?: () => Promise<EventContent> | EventContent;
+}
+
+type EventCollector = (options?: CollectorOptions) => Promise<EventContent> | EventContent;
+
 interface Event {
   event: string;
   collector: EventCollector;
 }
+
 const modules: Record<string, Record<string, Event>> = import.meta.glob(['./*.ts', '!./keys.ts'], {
   eager: true,
 });
@@ -26,9 +33,9 @@ export function isInnerEvent(event: string) {
   return Events.has(event);
 }
 
-export function getInnerEventData(event: string, params: any[] = []) {
+export function getInnerEventData(event: string, collectorOption?: CollectorOptions) {
   const colloctor = Events.get(event);
   if (isFunction(colloctor)) {
-    return colloctor(...params);
+    return colloctor(collectorOption);
   }
 }
