@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import TheAside from "./components/TheAside.vue";
+import TheAside from './components/TheAside.vue';
 </script>
 
 <template>
@@ -13,7 +13,7 @@ import TheAside from "./components/TheAside.vue";
 body {
   --app-header-height: 0;
   --app-aside-width: 240px;
-  font-family: "Helvetica", "Arial", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: 'Helvetica', 'Arial', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   @media (max-width: 840px) {
     --app-aside-width: 0;
   }

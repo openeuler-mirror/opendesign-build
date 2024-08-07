@@ -1,4 +1,5 @@
 import { OpenAnalytics, OpenEventKeys } from '../src/index';
+import { getClientInfo } from '../src/plugins';
 
 const btn1 = document.querySelector('#btn1');
 const btnOpen = document.querySelector('#btn-open');
@@ -15,9 +16,9 @@ const oa = new OpenAnalytics({
   },
   // immediate: true,
 });
-oa.setHeader({
-  appCode: '123',
-});
+
+oa.setHeader(getClientInfo());
+
 function enabledOA(enabled) {
   oa.enableReporting(enabled);
   localStorage.setItem('enabled', enabled ? '1' : '0');

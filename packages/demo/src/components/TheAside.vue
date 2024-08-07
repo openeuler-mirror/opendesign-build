@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { routes } from "@/router";
-import { ref, watch } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { routes } from '@/router';
+import { ref, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 const router = useRouter();
 const route = useRoute();
 
-const title = "组件";
-const currentNav = ref("Home");
+const title = '组件';
+const currentNav = ref('Home');
 
 watch(
   () => route.name,
@@ -15,16 +15,14 @@ watch(
   }
 );
 
-const navList = routes
-  .filter((item) => !item.exclude)
-  .map((item) => {
-    const { path, name, meta } = item;
-    return {
-      path,
-      name,
-      label: meta?.title,
-    };
-  });
+const navList = routes.map((item) => {
+  const { path, name, meta } = item;
+  return {
+    path,
+    name,
+    label: meta?.title,
+  };
+});
 const navClick = (item: (typeof navList)[0]) => {
   console.log(item.path);
   router.push(item.path);
