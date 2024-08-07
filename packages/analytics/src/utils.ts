@@ -1,4 +1,3 @@
-import { UAParser } from 'ua-parser-js';
 /**
  * 生成随机字符串
  * @param prefix 前缀
@@ -36,13 +35,6 @@ export function isObject(val: unknown): val is Record<any, any> {
 export const isPromise = <T>(val: unknown): val is Promise<T> => {
   return isObject(val) && isFunction(val.then) && isFunction(val.catch);
 };
-/**
- * 根据userAgent信息获取系统及浏览器信息
- */
-export function getClientByUA(userAgent: string = window.navigator.userAgent) {
-  const { browser, os, device } = UAParser(userAgent);
-  return { browser, os, device };
-}
 /**
  * 在文档准备完成
  * @param callback
