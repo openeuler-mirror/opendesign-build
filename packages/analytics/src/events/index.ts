@@ -27,8 +27,6 @@ for (const path in modules) {
   }
 }
 
-export { OpenEventKeys, Events };
-
 export function isInnerEvent(event: string) {
   return Events.has(event);
 }
