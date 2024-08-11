@@ -1,31 +1,31 @@
-import { createRouter, createWebHistory } from "vue-router";
-import TheHome from "./view/TheHome.vue";
-import { oa, OpenEventKeys } from "@/analytics";
+import { createRouter, createWebHistory } from 'vue-router';
+import TheHome from './view/TheHome.vue';
+import { oa, OpenEventKeys } from '@/analytics';
 
 export const routes = [
   {
-    path: "/",
-    name: "Home",
+    path: '/',
+    name: 'Home',
     component: TheHome,
     meta: {
-      title: "通用",
+      title: '通用',
     },
   },
 
   {
-    path: "/icons",
-    name: "icons",
-    component: () => import("@/view/TheIcons.vue"),
+    path: '/icons',
+    name: 'icons',
+    component: () => import('@/view/TheIcons.vue'),
     meta: {
-      title: "图标",
+      title: '图标',
     },
   },
   {
-    path: "/text",
-    name: "text",
-    component: () => import("@/view/TheText.vue"),
+    path: '/text',
+    name: 'text',
+    component: () => import('@/view/TheText.vue'),
     meta: {
-      title: "文本",
+      title: '文本',
     },
   },
 ];
@@ -40,16 +40,16 @@ export const router = createRouter({
     } else {
       return {
         top: 0,
-        behavior: "smooth",
+        behavior: 'smooth',
       };
     }
   },
 });
 
 router.afterEach((to, from) => {
-  oa.report(OpenEventKeys.PV, {
+  oa.report(OpenEventKeys.PV, () => ({
     prev_page: from.fullPath,
     url: to.fullPath,
-    title: to.meta.title,
-  });
+    title: to.meta.title as string,
+  }));
 });

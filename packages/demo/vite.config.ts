@@ -1,18 +1,17 @@
-import path from "path";
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
+import path from 'path';
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "./",
+  base: './',
   build: {
-    target: ["chrome74"],
-    outDir: "../../output/o",
+    target: ['chrome74'],
   },
   plugins: [vue()],
   resolve: {
     alias: {
-      "@/": `${path.resolve(__dirname, "./src")}/`,
+      '@/': `${path.resolve(__dirname, './src')}/`,
     },
   },
   server: {

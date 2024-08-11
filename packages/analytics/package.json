@@ -1,12 +1,13 @@
 {
   "name": "@opensig/open-analytics",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "opendesign analytics",
   "main": "dist/open-analytics.mjs",
   "types": "dist/open-analytics.d.ts",
   "files": [
     "dist"
   ],
+  "sideEffects": false,
   "scripts": {
     "dev": "vite",
     "build": " vite build"
