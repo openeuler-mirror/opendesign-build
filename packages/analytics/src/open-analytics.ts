@@ -235,6 +235,10 @@ export class OpenAnalytics {
    * @param options 配置
    */
   async report(event: string, content?: (...opts: any[]) => Promise<EventContent> | EventContent, collectOptions?: CollectorOptions, immediate?: boolean) {
+    if (!event) {
+      return;
+    }
+
     let reportData: EventContent = {};
 
     if (isInnerEvent(event)) {
