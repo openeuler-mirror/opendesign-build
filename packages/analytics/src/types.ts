@@ -5,7 +5,7 @@ export type EventContent = {
 export interface EventData {
   event: string; // 事件名
   time: number; // 事件采集时间
-  data: EventContent; // 上报的事件数据
+  properties: EventContent; // 上报的事件数据
   sId: string; // 会话id
 }
 
@@ -39,5 +39,6 @@ export interface OpenAnalyticsParams {
   immediate?: boolean; // 全局设置是否立即上报
   requestInterval?: number; //上报间隔
   maxEvents?: number;
+  storage?: typeof localStorage | typeof sessionStorage;
   requestPlan?: (requestFn: () => void) => void;
 }

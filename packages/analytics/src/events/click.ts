@@ -30,7 +30,6 @@ export default {
           clearTimeout(debounceId);
           debounceId = globalThis.setTimeout(async () => {
             const data = await handleClick(e, customData);
-            console.log(data);
 
             resolve(data);
           }, delay);

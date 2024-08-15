@@ -16,7 +16,7 @@ const oa = new OpenAnalytics({
   },
   // immediate: true,
 });
-
+console.log(oa);
 oa.setHeader(getClientInfo());
 
 function enabledOA(enabled) {

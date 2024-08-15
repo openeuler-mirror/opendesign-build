@@ -1,6 +1,5 @@
 import { isFunction } from './utils';
 
-type StorageInstance = typeof localStorage | typeof sessionStorage;
 interface StorageSetOptions {
   expire?: number;
   once?: boolean;
@@ -10,10 +9,10 @@ interface StorageOptions {
   checkExpiration?: (time: number) => boolean;
 }
 export class Storage {
-  store: StorageInstance = localStorage;
+  store: globalThis.Storage = globalThis.localStorage;
   checkExpiration: (expire: number) => boolean;
-  constructor(storage: StorageInstance, options?: StorageOptions) {
-    this.store = storage;
+  constructor(target: globalThis.Storage, options?: StorageOptions) {
+    this.store = target;
     this.checkExpiration = isFunction(options?.checkExpiration)
       ? options?.checkExpiration
       : (time: number) => {

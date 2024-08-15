@@ -1,4 +1,3 @@
-import { OpenEventKeys } from './_keys';
 import { EventContent } from '../types';
 
 import { isFunction } from '../utils';
