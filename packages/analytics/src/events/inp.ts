@@ -7,8 +7,8 @@ export default {
     return new Promise((resolve) => {
       onINP((m) => {
         resolve({
-          url: window.location.href,
-          inp: m.value,
+          $url: window.location.href,
+          $inp: m.value,
         });
       });
     });

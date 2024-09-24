@@ -9,11 +9,11 @@ async function handleClick(e: MouseEvent, customData?: (event: MouseEvent) => Pr
   const cData = isFunction(customData) ? await customData(e) : {};
 
   return {
-    url: window.location.href,
-    pageX,
-    pageY,
-    documentScrollLeft: scrollLeft,
-    documentScrollTop: scrollTop,
+    $url: window.location.href,
+    $pageX: pageX,
+    $pageY: pageY,
+    $documentScrollLeft: scrollLeft,
+    $documentScrollTop: scrollTop,
     ...cData,
   };
 }
