@@ -1,6 +1,6 @@
 {
   "name": "@opensig/open-analytics",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "opendesign analytics",
   "main": "dist/open-analytics.mjs",
   "types": "dist/open-analytics.d.ts",
@@ -14,12 +14,14 @@
   },
   "devDependencies": {
     "@types/ua-parser-js": "^0.7.39",
+    "@types/uuid": "^10.0.0",
     "typescript": "~5.3.3",
     "vite": "^5.3.4",
     "vite-plugin-dts": "^3.7.3"
   },
   "dependencies": {
     "ua-parser-js": "^1.0.38",
+    "uuid": "^10.0.0",
     "web-vitals": "^4.2.2"
   },
   "publishConfig": {

@@ -43,7 +43,7 @@ function initHeader(keys: StoreKeyIns, appId: string): EventHeader {
   const aKey = keys.client;
   const client = store.getAlways(aKey, {
     defaultValue: () => ({
-      id: uniqueId('', Constant.ID_LENGTH),
+      id: uniqueId(),
     }),
     setOption: {
       expire: Date.now() + Constant.CLIENT_EXPIRE_TIME,
@@ -70,7 +70,7 @@ function initHeader(keys: StoreKeyIns, appId: string): EventHeader {
 function getSessionId(sKey: string) {
   const session = store.getAlways(sKey, {
     defaultValue: () => ({
-      id: uniqueId('', Constant.ID_LENGTH),
+      id: uniqueId(),
     }),
     setOption: {
       expire: Date.now() + Constant.SESSION_EXPIRE_TIME,
