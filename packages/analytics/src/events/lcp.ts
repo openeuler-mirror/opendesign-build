@@ -7,8 +7,8 @@ export default {
     return new Promise((resolve) => {
       onLCP((m) => {
         resolve({
-          url: window.location.href,
-          lcp: m.value,
+          $url: window.location.href,
+          $lcp: m.value,
         });
       });
     });

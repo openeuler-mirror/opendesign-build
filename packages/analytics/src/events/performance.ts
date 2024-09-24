@@ -2,12 +2,12 @@ import { OpenEventKeys } from './_keys';
 import { onFCP, onTTFB } from 'web-vitals';
 
 interface PerformanceData {
-  url: string;
-  fcp: number;
-  ttfb: number;
-  load: number;
-  navigationEntry?: PerformanceNavigationTiming;
-  connection: {
+  $url: string;
+  $fcp: number;
+  $ttfb: number;
+  $load: number;
+  $navigationEntry?: PerformanceNavigationTiming;
+  $connection: {
     downlink: Megabit; // 有效带宽估算（单位：Mbps/s）
     effectiveType: EffectiveConnectionType; // 连接的有效类型
     rtt: Millisecond; // 当前连接的往返时延评估
@@ -29,11 +29,11 @@ export default {
   collector: () => {
     return new Promise((resolve) => {
       const data: PerformanceData = {
-        url: window.location.href,
-        fcp: -1,
-        ttfb: -1,
-        load: -1,
-        connection: getConnection(),
+        $url: window.location.href,
+        $fcp: -1,
+        $ttfb: -1,
+        $load: -1,
+        $connection: getConnection(),
       };
       let doneFcp = false;
       let doneTtfb = false;
@@ -45,16 +45,16 @@ export default {
       };
 
       onFCP((m) => {
-        data.fcp = m.value;
+        data.$fcp = m.value;
         doneFcp = true;
         doResolve();
       });
       onTTFB((m) => {
         doneTtfb = true;
         const entry = m.entries[0];
-        data.ttfb = m.value;
-        data.navigationEntry = entry;
-        data.load = entry.domComplete - entry.startTime;
+        data.$ttfb = m.value;
+        data.$navigationEntry = entry;
+        data.$load = entry.domComplete - entry.startTime;
         doResolve();
       });
     });
