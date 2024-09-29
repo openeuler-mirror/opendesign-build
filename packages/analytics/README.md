@@ -28,6 +28,11 @@
 1. 内置事件字段添加前缀"$"
 2. cid,sid 使用 uuid 生成
 
+# 0.0.7
+
+1. 支持服务端执行，解决 SSR\SSG 构建报错
+2. 移除 enable 标识记忆功能，通过调用者控制 enableReporting 确认是否上报
+
 # TODO
 
 1. 支持在 html 引入；
