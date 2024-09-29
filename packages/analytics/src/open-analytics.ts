@@ -244,7 +244,7 @@ export class OpenAnalytics {
    * @param data 事件数据，如果是内部事件，则会在内部事件触发时执行
    * @param options 配置
    */
-  async report(event: string, content?: (...opts: any[]) => Promise<EventContent> | EventContent, collectOptions?: CollectorOptions, immediate?: boolean) {
+  async report(event: string, content?: (...opts: any[]) => Promise<EventContent> | EventContent, immediate?: boolean) {
     if (!event) {
       return;
     }
@@ -252,7 +252,7 @@ export class OpenAnalytics {
     let reportData: EventContent = {};
 
     if (isInnerEvent(event)) {
-      reportData = (await getInnerEventData(event, collectOptions)) || {};
+      reportData = (await getInnerEventData(event, { customData: content })) || {};
     } else if (content) {
       reportData = await content();
     }
