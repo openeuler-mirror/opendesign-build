@@ -47,3 +47,8 @@ export function whenWindowLoad(callback: () => any): void {
     callback();
   }
 }
+
+/**
+ * 是否是浏览器环境
+ */
+export const isClient = typeof window !== 'undefined';

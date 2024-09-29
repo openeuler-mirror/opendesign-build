@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "pnpm --filter demo dev"
+    "dev:demo": "pnpm --filter demo dev",
+    "dev": "pnpm --filter @opensig/open-analytics dev"
   },
   "keywords": [],
   "author": "",

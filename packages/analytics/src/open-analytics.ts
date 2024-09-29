@@ -1,5 +1,5 @@
 import { Storage } from './storage';
-import { whenDocumentReady, isFunction, isPromise, uniqueId } from './utils';
+import { whenDocumentReady, isFunction, isPromise, uniqueId, isClient } from './utils';
 import { Constant } from './constant';
 import { getInnerEventData, isInnerEvent, CollectorOptions } from './events';
 import packageJson from '../package.json';
@@ -24,68 +24,29 @@ class AnalyticsStoreKey {
   }
 }
 type StoreKeyIns = InstanceType<typeof AnalyticsStoreKey>;
-
-let store: InstanceType<typeof Storage>;
 /**
- * 初始化存储器
- * @param appId {string}
+ * 创建存储对象
  */
-function initStorage(target?: globalThis.Storage) {
-  store = new Storage(target || globalThis.localStorage);
-}
-
-/**
- * 初始化通用数据
- * @param keys {string}
- * @param appId {string}
- */
-function initHeader(keys: StoreKeyIns, appId: string): EventHeader {
-  const aKey = keys.client;
-  const client = store.getAlways(aKey, {
-    defaultValue: () => ({
-      id: uniqueId(),
-    }),
-    setOption: {
-      expire: Date.now() + Constant.CLIENT_EXPIRE_TIME,
-    },
-    onValid() {
-      store.setExpire(aKey, Date.now() + Constant.CLIENT_EXPIRE_TIME);
-    },
-  }).value;
-
+function createStorageTarget() {
+  if (isClient) {
+    return globalThis.localStorage;
+  }
+  const store: Record<string, string> = {};
   return {
-    cId: client.id,
-    aId: appId,
-    oa_version: packageJson.version,
-    viewport_width: window.innerWidth,
-    viewport_height: window.innerHeight,
-    screen_width: window.screen.width || window.innerWidth,
-    screen_height: window.screen.height || window.innerHeight,
+    setItem(key: string, value: string) {
+      store[key] = value;
+    },
+    getItem(key: string) {
+      return store[key];
+    },
+    removeItem(key: string) {
+      delete store[key];
+    },
   };
-}
-/**
- * 获取会话id，每次获取，延长有效期
- * @param sKey session key
- */
-function getSessionId(sKey: string) {
-  const session = store.getAlways(sKey, {
-    defaultValue: () => ({
-      id: uniqueId(),
-    }),
-    setOption: {
-      expire: Date.now() + Constant.SESSION_EXPIRE_TIME,
-    },
-    onValid() {
-      store.setExpire(sKey, Date.now() + Constant.SESSION_EXPIRE_TIME);
-    },
-  }).value;
-
-  return session.id;
 }
 
 export class OpenAnalytics {
-  enabled: boolean;
-
+  #store: InstanceType<typeof Storage>;
   #timer: number | null;
   #firstReport: boolean;
   #request: ReportRequest;
@@ -100,12 +61,14 @@ export class OpenAnalytics {
   // 上报间隔，默认3s
   #requestInterval: number;
   #maxEvents: number;
+
+  enabled: boolean;
   /**
    * 构造函数
    * @param params {OpenAnalyticsParams}
    */
   constructor(params: OpenAnalyticsParams) {
-    initStorage();
+    this.#store = new Storage(createStorageTarget());
     this.#request = params.request;
     this.#immediate = params.immediate ?? false;
     this.#appKey = params.appKey ?? '';
@@ -116,19 +79,67 @@ export class OpenAnalytics {
 
     this.#firstReport = true;
 
-    this.enabled = store.get(this.#StoreKey.enabled).value === Constant.OA_ENABLED;
+    this.enabled = this.#store.get(this.#StoreKey.enabled).value === Constant.OA_ENABLED;
 
     if (this.enabled) {
-      store.set(this.#StoreKey.enabled, Constant.OA_ENABLED);
-      this.#eventData = store.getAlways(this.#StoreKey.events, {
+      this.#store.set(this.#StoreKey.enabled, Constant.OA_ENABLED);
+      this.#eventData = this.#store.getAlways(this.#StoreKey.events, {
         defaultValue: () => [],
       }).value;
-      this.#header = initHeader(this.#StoreKey, this.#appKey);
+      this.#header = this.#initHeader(this.#StoreKey, this.#appKey);
     } else {
       this.#header = {};
       this.#eventData = [];
-      store.remove(this.#StoreKey.events);
+      this.#store.remove(this.#StoreKey.events);
     }
+  }
+  /**
+   * 初始化通用数据
+   * @param keys {string}
+   * @param appId {string}
+   */
+  #initHeader(keys: StoreKeyIns, appId: string): EventHeader {
+    const aKey = keys.client;
+    const client = this.#store.getAlways(aKey, {
+      defaultValue: () => ({
+        id: uniqueId(),
+      }),
+      setOption: {
+        expire: Date.now() + Constant.CLIENT_EXPIRE_TIME,
+      },
+      onValid: () => {
+        this.#store.setExpire(aKey, Date.now() + Constant.CLIENT_EXPIRE_TIME);
+      },
+    }).value;
+
+    return {
+      cId: client.id,
+      aId: appId,
+      oa_version: packageJson.version,
+      viewport_width: window.innerWidth,
+      viewport_height: window.innerHeight,
+      screen_width: window.screen.width || window.innerWidth,
+      screen_height: window.screen.height || window.innerHeight,
+    };
+  }
+  /**
+   * 获取会话id，每次获取，延长有效期
+   * @param sKey session key
+   */
+  #getSessionId(sKey: string) {
+    const session = this.#store.getAlways(sKey, {
+      defaultValue: () => ({
+        id: uniqueId(),
+      }),
+      setOption: {
+        expire: Date.now() + Constant.SESSION_EXPIRE_TIME,
+      },
+      onValid: () => {
+        this.#store.setExpire(sKey, Date.now() + Constant.SESSION_EXPIRE_TIME);
+      },
+    }).value;
+
+    return session.id;
   }
   /**
    * 搜集数据
@@ -141,9 +152,60 @@ export class OpenAnalytics {
       this.#eventData.shift();
     }
     if (this.enabled) {
-      store.set(this.#StoreKey.events, this.#eventData);
+      this.#store.set(this.#StoreKey.events, this.#eventData);
 
-      this.runRequestPlan(immediate);
+      this.#runRequestPlan(immediate);
+    }
+  }
+
+  /**
+   * 执行上报策略
+   * @param immediate
+   */
+  #runRequestPlan(immediate?: boolean) {
+    if (immediate || this.#immediate) {
+      this.#doSendEventData();
+    } else if (this.#firstReport) {
+      this.#firstReport = false;
+      whenDocumentReady(() => this.#doSendEventData());
+    } else {
+      if (isFunction(this.#requestPlan)) {
+        this.#requestPlan(this.#doSendEventData);
+      } else {
+        const run = () => {
+          this.#timer = window.setTimeout(() => {
+            this.#doSendEventData();
+            run();
+          }, this.#requestInterval);
+        };
+        if (!this.#timer) {
+          run();
+        }
+      }
+    }
+  }
+  /**
+   * 发起数据上报
+   */
+  #doSendEventData() {
+    if (!this.#request || !this.enabled || this.#eventData.length === 0) {
+      return;
+    }
+    const reportData = {
+      header: this.#header,
+      body: this.#eventData,
+    };
+    const rlt = this.#request(reportData);
+    if (isPromise(rlt)) {
+      rlt.then((isSuccess) => {
+        if (isSuccess) {
+          this.#eventData = [];
+          this.#store.set(this.#StoreKey.events, []);
+        }
+      });
+    } else {
+      this.#eventData = [];
+      this.#store.set(this.#StoreKey.events, []);
     }
   }
   /**
@@ -162,10 +224,10 @@ export class OpenAnalytics {
     }
 
     if (this.enabled) {
-      store.set(this.#StoreKey.enabled, Constant.OA_ENABLED);
-      this.#header = Object.assign(initHeader(this.#StoreKey, this.#appKey), this.#header);
+      this.#store.set(this.#StoreKey.enabled, Constant.OA_ENABLED);
+      this.#header = Object.assign(this.#initHeader(this.#StoreKey, this.#appKey), this.#header);
       // 初始化sessionId
-      this.#sessionId = getSessionId(this.#StoreKey.session);
+      this.#sessionId = this.#getSessionId(this.#StoreKey.session);
       // 给内存中事件添加sessionId
       this.#eventData.forEach((event) => {
         if (event.sId === '') {
@@ -173,17 +235,17 @@ export class OpenAnalytics {
         }
       });
       // 将数据存储到本地
-      store.set(this.#StoreKey.events, this.#eventData);
+      this.#store.set(this.#StoreKey.events, this.#eventData);
       // 执行上报策略
-      this.runRequestPlan();
+      this.#runRequestPlan();
     } else if (this.#timer) {
       clearTimeout(this.#timer);
       this.#timer = 0;
       this.#eventData = [];
-      store.remove(this.#StoreKey.enabled);
-      store.remove(this.#StoreKey.events);
-      store.remove(this.#StoreKey.client);
-      store.remove(this.#StoreKey.session);
+      this.#store.remove(this.#StoreKey.enabled);
+      this.#store.remove(this.#StoreKey.events);
+      this.#store.remove(this.#StoreKey.client);
+      this.#store.remove(this.#StoreKey.session);
     }
   }
   /**
@@ -209,59 +271,9 @@ export class OpenAnalytics {
       event: event,
       time: Date.now(),
       properties: reportData,
-      sId: this.enabled ? getSessionId(this.#StoreKey.session) : '',
+      sId: this.enabled ? this.#getSessionId(this.#StoreKey.session) : '',
     };
 
     this.#collect(eventData, immediate);
-  }
-  /**
-   * 执行上报策略
-   * @param immediate
-   */
-  runRequestPlan(immediate?: boolean) {
-    if (immediate || this.#immediate) {
-      this.doSendEventData();
-    } else if (this.#firstReport) {
-      this.#firstReport = false;
-      whenDocumentReady(() => this.doSendEventData());
-    } else {
-      if (isFunction(this.#requestPlan)) {
-        this.#requestPlan(this.doSendEventData);
-      } else {
-        const run = () => {
-          this.#timer = window.setTimeout(() => {
-            this.doSendEventData();
-            run();
-          }, this.#requestInterval);
-        };
-        if (!this.#timer) {
-          run();
-        }
-      }
-    }
-  }
-  /**
-   * 发起数据上报
-   */
-  doSendEventData() {
-    if (!this.#request || !this.enabled || this.#eventData.length === 0) {
-      return;
-    }
-    const reportData = {
-      header: this.#header,
-      body: this.#eventData,
-    };
-    const rlt = this.#request(reportData);
-    if (isPromise(rlt)) {
-      rlt.then((isSuccess) => {
-        if (isSuccess) {
-          this.#eventData = [];
-          store.set(this.#StoreKey.events, []);
-        }
-      });
-    } else {
-      this.#eventData = [];
-      store.set(this.#StoreKey.events, []);
-    }
   }
 }

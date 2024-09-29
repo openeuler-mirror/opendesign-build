@@ -8,10 +8,17 @@ interface StorageSetOptions {
 interface StorageOptions {
   checkExpiration?: (time: number) => boolean;
 }
+
+export interface StorageTarget {
+  setItem: (key: string, value: any) => void;
+  removeItem: (key: string) => void;
+  getItem: (key: string) => string | null;
+}
+
 export class Storage {
-  store: globalThis.Storage = globalThis.localStorage;
+  store: StorageTarget;
   checkExpiration: (expire: number) => boolean;
-  constructor(target: globalThis.Storage, options?: StorageOptions) {
+  constructor(target: StorageTarget, options?: StorageOptions) {
     this.store = target;
     this.checkExpiration = isFunction(options?.checkExpiration)
       ? options?.checkExpiration
