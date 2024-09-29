@@ -9,14 +9,12 @@ class AnalyticsStoreKey {
   appPrefix: string;
   client: string;
   session: string;
-  enabled: string;
   events: string;
   constructor(appKey: string = '') {
     this.appPrefix = appKey ? `${appKey}-` : '';
 
     this.client = this.getKey('client');
     this.session = this.getKey('session');
-    this.enabled = this.getKey('enabled');
     this.events = this.getKey('events');
   }
   getKey(key: string) {
@@ -218,7 +216,6 @@ export class OpenAnalytics {
     }
 
     if (this.enabled) {
-      this.#store.set(this.#StoreKey.enabled, Constant.OA_ENABLED);
       this.#header = Object.assign(this.#initHeader(this.#StoreKey, this.#appKey), this.#header);
       // 初始化sessionId
       this.#sessionId = this.#getSessionId(this.#StoreKey.session);
@@ -236,7 +233,6 @@ export class OpenAnalytics {
       clearTimeout(this.#timer);
       this.#timer = 0;
       this.#eventData = [];
-      this.#store.remove(this.#StoreKey.enabled);
       this.#store.remove(this.#StoreKey.events);
       this.#store.remove(this.#StoreKey.client);
       this.#store.remove(this.#StoreKey.session);
