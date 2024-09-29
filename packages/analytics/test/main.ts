@@ -23,9 +23,8 @@ function enabledOA(enabled) {
   oa.enableReporting(enabled);
   localStorage.setItem('enabled', enabled ? '1' : '0');
 }
-if (localStorage.getItem('enabled') !== '1') {
-  enabledOA(false);
-}
+
+enabledOA(localStorage.getItem('enabled') === '1');
 
 oa.report(OpenEventKeys.PV, () => ({
   id: 'home',

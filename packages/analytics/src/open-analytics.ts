@@ -79,19 +79,13 @@ export class OpenAnalytics {
 
     this.#firstReport = true;
 
-    this.enabled = this.#store.get(this.#StoreKey.enabled).value === Constant.OA_ENABLED;
+    this.#eventData = this.#store.getAlways(this.#StoreKey.events, {
+      defaultValue: () => [],
+    }).value;
 
-    if (this.enabled) {
-      this.#store.set(this.#StoreKey.enabled, Constant.OA_ENABLED);
-      this.#eventData = this.#store.getAlways(this.#StoreKey.events, {
-        defaultValue: () => [],
-      }).value;
-      this.#header = this.#initHeader(this.#StoreKey, this.#appKey);
-    } else {
-      this.#header = {};
-      this.#eventData = [];
-      this.#store.remove(this.#StoreKey.events);
-    }
+    this.#header = {};
+
+    this.enabled = false;
   }
   /**
    * 初始化通用数据
