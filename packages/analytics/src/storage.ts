@@ -91,17 +91,21 @@ export class Storage {
       setOption,
       onValid,
       checkExpiration,
+      save = true,
     }: {
       defaultValue: () => any;
       setOption?: StorageSetOptions;
       onValid?: (value: any, expire: number) => void;
       checkExpiration?: (expire: number) => boolean;
+      save?: boolean; // 是否保存默认值
     }
   ) {
     let { value } = this.get(key, { checkExpiration, onValid });
     if (value === undefined) {
       value = defaultValue();
-      this.set(key, value, setOption);
+      if (save) {
+        this.set(key, value, setOption);
+      }
     }
     return {
       value,
