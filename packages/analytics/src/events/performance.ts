@@ -1,3 +1,4 @@
+import { EventContent, EventParams } from '../types';
 import { OpenEventKeys } from './_keys';
 import { onFCP, onTTFB } from 'web-vitals';
 
@@ -26,37 +27,36 @@ function getConnection() {
 }
 export default {
   event: OpenEventKeys.PageBasePerformance,
-  collector: () => {
-    return new Promise((resolve) => {
-      const data: PerformanceData = {
-        $url: window.location.href,
-        $fcp: -1,
-        $ttfb: -1,
-        $load: -1,
-        $connection: getConnection(),
-      };
-      let doneFcp = false;
-      let doneTtfb = false;
+  collector: (onCollect: (data: EventContent, params: EventParams) => void) => {
+    const data: PerformanceData = {
+      $url: window.location.href,
+      $fcp: -1,
+      $ttfb: -1,
+      $load: -1,
+      $connection: getConnection(),
+    };
+    let doneFcp = false;
+    let doneTtfb = false;
+    let entry: PerformanceNavigationTiming;
 
-      const doResolve = () => {
-        if (doneFcp && doneTtfb) {
-          resolve(data);
-        }
-      };
+    const doResolve = () => {
+      if (doneFcp && doneTtfb) {
+        onCollect(data, entry);
+      }
+    };
 
-      onFCP((m) => {
-        data.$fcp = m.value;
-        doneFcp = true;
-        doResolve();
-      });
-      onTTFB((m) => {
-        doneTtfb = true;
-        const entry = m.entries[0];
-        data.$ttfb = m.value;
-        data.$navigationEntry = entry;
-        data.$load = entry.domComplete - entry.startTime;
-        doResolve();
-      });
+    onFCP((m) => {
+      data.$fcp = m.value;
+      doneFcp = true;
+      doResolve();
+    });
+    onTTFB((m) => {
+      doneTtfb = true;
+      entry = m.entries[0];
+      data.$ttfb = m.value;
+      data.$navigationEntry = entry;
+      data.$load = entry.domComplete - entry.startTime;
+      doResolve();
     });
   },
 };

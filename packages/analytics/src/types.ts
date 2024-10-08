@@ -1,6 +1,7 @@
 export type EventContent = {
-  [k: string | number]: string | number | EventContent | undefined | null;
+  [k: string | number]: any;
 };
+export type EventParams = any;
 
 export interface EventData {
   event: string; // 事件名

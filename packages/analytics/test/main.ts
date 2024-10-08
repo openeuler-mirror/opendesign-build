@@ -32,15 +32,23 @@ oa.report(OpenEventKeys.PV, () => ({
 oa.report(OpenEventKeys.PageBasePerformance);
 oa.report(OpenEventKeys.LCP);
 oa.report(OpenEventKeys.INP);
-oa.report(OpenEventKeys.PageClick, (e: MouseEvent) => {
-  const scroller = document.querySelector('.inner-screen');
-  const el = e.target as HTMLElement | null;
-  return {
-    documentScrollLeft: 123, // 覆盖默认值
-    name: el?.innerHTML, // 新增字段
-    top: scroller?.scrollTop, // 新增字段
-  };
-});
+oa.report(
+  OpenEventKeys.PageClick,
+  (e: MouseEvent) => {
+    const scroller = document.querySelector('.inner-screen');
+    const el = e.target as HTMLElement | null;
+    return {
+      documentScrollLeft: 123, // 覆盖默认值
+      name: el?.innerHTML, // 新增字段
+      top: scroller?.scrollTop, // 新增字段
+    };
+  },
+  {
+    eventOptions: {
+      delay: 1000, // 指定点击防抖时间，不传默认800
+    },
+  }
+);
 
 btn1?.addEventListener('click', () => {
   // window.open('/');

@@ -1,9 +1,9 @@
 import { Storage } from './storage';
 import { whenDocumentReady, isFunction, isPromise, uniqueId, isClient } from './utils';
 import { Constant } from './constant';
-import { getInnerEventData, isInnerEvent, CollectorOptions } from './events';
+import { reportInnerEvent, isInnerEvent } from './events';
 import packageJson from '../package.json';
-import { EventContent, EventData, EventHeader, OpenAnalyticsParams, ReportRequest } from './types';
+import { EventContent, EventData, EventHeader, OpenAnalyticsParams, ReportRequest, EventParams } from './types';
 
 class AnalyticsStoreKey {
   appPrefix: string;
@@ -79,6 +79,7 @@ export class OpenAnalytics {
 
     this.#eventData = this.#store.getAlways(this.#StoreKey.events, {
       defaultValue: () => [],
+      save: false,
     }).value;
 
     this.#header = {};
@@ -244,26 +245,51 @@ export class OpenAnalytics {
    * @param data 事件数据，如果是内部事件，则会在内部事件触发时执行
    * @param options 配置
    */
-  async report(event: string, content?: (...opts: any[]) => Promise<EventContent> | EventContent, collectOptions?: CollectorOptions, immediate?: boolean) {
+  async report(
+    event: string,
+    content?: (...opts: any[]) => Promise<EventContent> | EventContent,
+    options?: {
+      immediate?: boolean;
+      eventOptions?: any;
+    }
+  ) {
     if (!event) {
       return;
     }
+    const sId = this.enabled ? this.#getSessionId(this.#StoreKey.session) : '';
 
-    let reportData: EventContent = {};
-
-    if (isInnerEvent(event)) {
-      reportData = (await getInnerEventData(event, collectOptions)) || {};
-    } else if (content) {
-      reportData = await content();
+    if (!isInnerEvent(event)) {
+      const cData = isFunction(content) ? await content() : {};
+      // 非内部事件
+      this.#collect(
+        {
+          sId,
+          event,
+          time: Date.now(),
+          properties: cData,
+        },
+        options?.immediate
+      );
+      return;
     }
 
-    const eventData: EventData = {
-      event: event,
-      time: Date.now(),
-      properties: reportData,
-      sId: this.enabled ? this.#getSessionId(this.#StoreKey.session) : '',
-    };
+    // 上报内部事件
+    reportInnerEvent(
+      event,
+      async (data: EventContent, params: EventParams) => {
+        const cData = isFunction(content) ? await content(params) : {};
 
-    this.#collect(eventData, immediate);
+        this.#collect(
+          {
+            sId,
+            event,
+            time: Date.now(),
+            properties: Object.assign(data, cData),
+          },
+          options?.immediate
+        );
+      },
+      options?.eventOptions
+    );
   }
 }
