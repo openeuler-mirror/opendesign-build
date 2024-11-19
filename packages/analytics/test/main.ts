@@ -6,13 +6,15 @@ const btnOpen = document.querySelector('#btn-open');
 const btnClose = document.querySelector('#btn-close');
 const btnEnvDev = document.querySelector('#btn-env-dev');
 const btnEnvProd = document.querySelector('#btn-env-prod');
+const btnLogin = document.querySelector('#btn-login');
+const btnLogout = document.querySelector('#btn-logout');
 
 const oa = new OpenAnalytics({
   appKey: 'test',
   request: (data) => {
     console.log(
       'request to send content',
-      data.header.env,
+      data.header,
       data.body.map((item) => item.event)
     );
     // return fetch('report', {
@@ -76,4 +78,11 @@ btnEnvDev?.addEventListener('click', () => {
 });
 btnEnvProd?.addEventListener('click', () => {
   oa.setEnvironment('prodution');
+});
+
+btnLogin?.addEventListener('click', () => {
+  oa.setUserId('12332112312312');
+});
+btnLogout?.addEventListener('click', () => {
+  oa.setUserId('');
 });

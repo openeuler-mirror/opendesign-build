@@ -14,6 +14,7 @@ export type Environment = 'development' | 'production' | (string & {});
 
 export interface EventHeader {
   env?: Environment; // 当前运行环境
+  uId?: string; // 用户id
   cId?: string; // 客户端匿名标识，清除浏览器缓存销毁
   aId?: string; // 应用id
   oa_version?: string; // OA版本
