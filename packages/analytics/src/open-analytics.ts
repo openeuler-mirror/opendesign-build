@@ -108,6 +108,7 @@ export class OpenAnalytics {
     }).value;
 
     return {
+      uId: '',
       cId: client.id,
       aId: appId,
       oa_version: packageJson.version,
@@ -219,6 +220,14 @@ export class OpenAnalytics {
     }
     Object.assign(this.#header, {
       env: env,
+    });
+  }
+  /**
+   * 设置user id
+   */
+  setUserId(userId: string) {
+    Object.assign(this.#header, {
+      uId: userId,
     });
   }
   /**
