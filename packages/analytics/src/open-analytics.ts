@@ -3,7 +3,7 @@ import { whenDocumentReady, isFunction, isPromise, uniqueId, isClient } from './
 import { Constant } from './constant';
 import { reportInnerEvent, isInnerEvent } from './events';
 import packageJson from '../package.json';
-import { EventContent, EventData, EventHeader, OpenAnalyticsParams, ReportRequest, EventParams } from './types';
+import { EventContent, EventData, EventHeader, OpenAnalyticsParams, ReportRequest, EventParams, Environment } from './types';
 
 class AnalyticsStoreKey {
   appPrefix: string;
@@ -82,7 +82,9 @@ export class OpenAnalytics {
       save: false,
     }).value;
 
-    this.#header = {};
+    this.#header = {
+      env: params.env ?? 'production',
+    };
 
     this.enabled = false;
   }
@@ -106,6 +108,7 @@ export class OpenAnalytics {
     }).value;
 
     return {
+      env: 'development',
       cId: client.id,
       aId: appId,
       oa_version: packageJson.version,
@@ -206,6 +209,18 @@ export class OpenAnalytics {
    */
   setHeader(header: Record<string, string | number>) {
     Object.assign(this.#header, header);
+  }
+  /**
+   * 设置运行环境
+   */
+  setEnvironment(env: Environment) {
+    // 如果环境切换，需将之前环境数据上报，避免旧环境数据记录到新环境
+    if (this.#header.env !== env) {
+      this.#runRequestPlan(true);
+    }
+    Object.assign(this.#header, {
+      env: env,
+    });
   }
   /**
    * 控制是否发送数据上报
