@@ -10,7 +10,10 @@ export interface EventData {
   sId: string; // 会话id
 }
 
+export type Environment = 'development' | 'production' | (string & {});
+
 export interface EventHeader {
+  env?: Environment; // 当前运行环境
   cId?: string; // 客户端匿名标识，清除浏览器缓存销毁
   aId?: string; // 应用id
   oa_version?: string; // OA版本
@@ -35,6 +38,7 @@ export interface ReportData {
 export type ReportRequest = (data: ReportData) => Promise<boolean> | void;
 
 export interface OpenAnalyticsParams {
+  env?: Environment; // 当前环境
   request: (data: ReportData) => Promise<boolean> | void; // 上报数据的接口
   appKey?: string; // 采集app的key，用于区分多app上报
   immediate?: boolean; // 全局设置是否立即上报

@@ -4,11 +4,17 @@ import { getClientInfo } from '../src/plugins';
 const btn1 = document.querySelector('#btn1');
 const btnOpen = document.querySelector('#btn-open');
 const btnClose = document.querySelector('#btn-close');
+const btnEnvDev = document.querySelector('#btn-env-dev');
+const btnEnvProd = document.querySelector('#btn-env-prod');
 
 const oa = new OpenAnalytics({
   appKey: 'test',
   request: (data) => {
-    console.log('request to send content', data);
+    console.log(
+      'request to send content',
+      data.header.env,
+      data.body.map((item) => item.event)
+    );
     // return fetch('report', {
     //   method: 'POST',
     //   body: JSON.stringify(data),
@@ -64,4 +70,10 @@ btnOpen?.addEventListener('click', () => {
 });
 btnClose?.addEventListener('click', () => {
   enabledOA(false);
+});
+btnEnvDev?.addEventListener('click', () => {
+  oa.setEnvironment('development');
+});
+btnEnvProd?.addEventListener('click', () => {
+  oa.setEnvironment('prodution');
 });
