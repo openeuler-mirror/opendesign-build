@@ -108,7 +108,6 @@ export class OpenAnalytics {
     }).value;
 
     return {
-      env: 'development',
       cId: client.id,
       aId: appId,
       oa_version: packageJson.version,
